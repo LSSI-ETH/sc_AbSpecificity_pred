@@ -11,11 +11,13 @@
 ehthumbs.db
 Thumbs.db
 
-# Logs and databases #
+# Logs, config files and databases #
 ######################
 *.log
 *.sql
 *.sqlite
+config_*.txt
+
 # Compiled source #
 ###################
 *.com

@@ -28,7 +28,7 @@ sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
 
 
 # import custom modules
-import utils_nb as utils
+import sc_AbSpecificity_pred.src.utils_nb as utils
 import utils_abmap_analysis as utilsa
 import Load_embs_class as lec
 import Specificity_classification_class as CLF
@@ -429,6 +429,10 @@ def run():
             # define embedding list
             feat_list = [GEX, kmer, GEX_kmer]
 
+
+            # define file path
+            file_path = os.path.join(ROOT_DIR, parser.out_path,f'{today}_{c_type}_Spec_classification_CV_results.csv')
+
             results_l = []
             for n, pipes in zip(['', '_pca'], [[('scaler', StandardScaler())], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]):
                 for emb_name, emb in zip(feat_n_ls, feat_list):
@@ -439,6 +443,10 @@ def run():
                                                 pipe_ls = pipes, log=log)
                     results_l.append(results)
 
+                    # save intermediate result
+                    results = pd.concat(results_l)
+                    results.to_csv(file_path, index=False)
+
             log.info(f'Evaluation done')
 
         except Exception as e:
@@ -448,9 +456,9 @@ def run():
 
 
         results = pd.concat(results_l)
-        results.to_csv(os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/GEX_BCR/{today}_{dataset}05split_BCR_GEX_Spec_classification_CV_results.csv'), index=False)
+        results.to_csv(file_path, index=False)
 
-        log.info(f'Results saved in {os.path.join(ROOT_DIR, f"data/model_evaluation/Specificity_classification/GEX_BCR/{today}_{dataset}05split_BCR_GEX_Spec_classification_CV_results.csv")}')
+        log.info(f'Results saved in {file_path}')
 
 
 

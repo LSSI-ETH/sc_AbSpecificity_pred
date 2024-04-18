@@ -23,7 +23,7 @@ sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
 
 
 # import custom modules
-import utils_nb as utils
+import sc_AbSpecificity_pred.src.utils_nb as utils
 import utils_abmap_analysis as utilsa
 import Load_embs_class as lec
 
@@ -681,177 +681,177 @@ def run_clf_on_splits(X, y, train_test_splits, sim_split, emb_name, RF=None, log
 ######## MAIN ########
 
 
-def run():
-    # pass
+# def run():
+#     # pass
 
-    # set random seed
-    random.seed(123)
-    today = str(datetime.now().date())
-    log = utils.Logger(__name__, log_file=f'test{today}_app.log').get_logger()
-    log.info('Start Script!')
+#     # set random seed
+#     random.seed(123)
+#     today = str(datetime.now().date())
+#     log = utils.Logger(__name__, log_file=f'test{today}_app.log').get_logger()
+#     log.info('Start Script!')
 
-    # for ab_chain in ['VDJ_VJ_aaSeq']:#, 'VDJ_aaSeq']:
-    ab_chain = 'VDJ_VJ_aaSeq'
+#     # for ab_chain in ['VDJ_VJ_aaSeq']:#, 'VDJ_aaSeq']:
+#     ab_chain = 'VDJ_VJ_aaSeq'
 
-    if ab_chain == 'VDJ_aaSeq': 
-        c_type = 'VH'
-        filter_192 = False
-    elif ab_chain == 'VDJ_VJ_aaSeq':
-        c_type = 'VH_VL'
-        filter_192 = True
-
-
-    # setup parser for the config file
-    config = configparser.ConfigParser()
-    config.read(CONFIG_PATH)
-    ROOT_DIR = config['ROOT']['ROOT_DIR']
+#     if ab_chain == 'VDJ_aaSeq': 
+#         c_type = 'VH'
+#         filter_192 = False
+#     elif ab_chain == 'VDJ_VJ_aaSeq':
+#         c_type = 'VH_VL'
+#         filter_192 = True
 
 
-    ######## LOADING CLASS ########
-    try:
-        Embeddings = lec.LoadEmbeddings_VH_VL(CONFIG_PATH=CONFIG_PATH, seq_col=ab_chain, filter_192 = filter_192,
-                                            filter_VH_complete = False)
+#     # setup parser for the config file
+#     config = configparser.ConfigParser()
+#     config.read(CONFIG_PATH)
+#     ROOT_DIR = config['ROOT']['ROOT_DIR']
+
+
+#     ######## LOADING CLASS ########
+#     try:
+#         Embeddings = lec.LoadEmbeddings_VH_VL(CONFIG_PATH=CONFIG_PATH, seq_col=ab_chain, filter_192 = filter_192,
+#                                             filter_VH_complete = False)
         
-        Embeddings.load_embeddings(embedding_type = 'antiberty', verbose=False)
-        # Seq column name 'VDJ_aaSeq', 'VDJ_aaSeqCDR3', 'cdr_comb'...
-        seq_col = Embeddings.seq_col
+#         Embeddings.load_embeddings(embedding_type = 'antiberty', verbose=False)
+#         # Seq column name 'VDJ_aaSeq', 'VDJ_aaSeqCDR3', 'cdr_comb'...
+#         seq_col = Embeddings.seq_col
         
 
-        ### Load mAb sequences
-        seq_df = Embeddings.seq_df
-        names = Embeddings.names
-        seqs = Embeddings.seqs
+#         ### Load mAb sequences
+#         seq_df = Embeddings.seq_df
+#         names = Embeddings.names
+#         seqs = Embeddings.seqs
 
 
-#             ### AbMAP  - VH_VL
-#             Abmap_fl_embeddings = Embeddings.emb_AM
-#             log.info("AbMap - embeddings loaded")
+# #             ### AbMAP  - VH_VL
+# #             Abmap_fl_embeddings = Embeddings.emb_AM
+# #             log.info("AbMap - embeddings loaded")
 
 
-#             ### Load embeddings - ESM2 - VH_VL
-#             ESM_fl_embeddings = Embeddings.emb_ESM
-#             log.info("ESM - embeddings loaded")
+# #             ### Load embeddings - ESM2 - VH_VL
+# #             ESM_fl_embeddings = Embeddings.emb_ESM
+# #             log.info("ESM - embeddings loaded")
 
 
-#             ### Load embeddings - ESM2 augmented - VH_VL
-#             ESM_aug_fl_embeddings = Embeddings.emb_ESM_aug
-#             log.info("ESM augmented - embeddings loaded")
+# #             ### Load embeddings - ESM2 augmented - VH_VL
+# #             ESM_aug_fl_embeddings = Embeddings.emb_ESM_aug
+# #             log.info("ESM augmented - embeddings loaded")
 
 
-#             ### Load embeddings - ESM2 CDRextract - VH_VL
-#             ESM_cdr_fl_embeddings = Embeddings.emb_ESM_cdrs
-#             log.info("ESM CDRextract - embeddings loaded")
+# #             ### Load embeddings - ESM2 CDRextract - VH_VL
+# #             ESM_cdr_fl_embeddings = Embeddings.emb_ESM_cdrs
+# #             log.info("ESM CDRextract - embeddings loaded")
 
         
-        ### Load embeddings - Antiberty - VH_VL
-        antiberty_embeddings = Embeddings.emb_antiberty
-        log.info("Antiberty - embeddings loaded")
+#         ### Load embeddings - Antiberty - VH_VL
+#         antiberty_embeddings = Embeddings.emb_antiberty
+#         log.info("Antiberty - embeddings loaded")
 
-        # Calculate the kmer vectors
-        k=3
-        all_kmers = utils.generate_all_kmers(seqs, k)
-        vectors = [utils.freqs_to_vector(utils.kmer_frequencies(seq, k), all_kmers) for seq in seqs]
-        kmer_arr_3 = np.array(vectors)
+#         # Calculate the kmer vectors
+#         k=3
+#         all_kmers = utils.generate_all_kmers(seqs, k)
+#         vectors = [utils.freqs_to_vector(utils.kmer_frequencies(seq, k), all_kmers) for seq in seqs]
+#         kmer_arr_3 = np.array(vectors)
 
-        # k=2
-        # all_kmers = utils.generate_all_kmers(seqs, k)
-        # vectors = [utils.freqs_to_vector(utils.kmer_frequencies(seq, k), all_kmers) for seq in seqs]
-        # kmer_arr_5 = np.array(vectors)           
-        # log.info("kmer embeddings calculated")
-
-
-        # Load sequence distance matrix
-        distance_matrix = Embeddings.dist_matrix
-        log.info("distance matrix loaded")
-
-    except Exception as e:
-        log.exception(f'ERROR Loading files: {e}')
+#         # k=2
+#         # all_kmers = utils.generate_all_kmers(seqs, k)
+#         # vectors = [utils.freqs_to_vector(utils.kmer_frequencies(seq, k), all_kmers) for seq in seqs]
+#         # kmer_arr_5 = np.array(vectors)           
+#         # log.info("kmer embeddings calculated")
 
 
+#         # Load sequence distance matrix
+#         distance_matrix = Embeddings.dist_matrix
+#         log.info("distance matrix loaded")
+
+#     except Exception as e:
+#         log.exception(f'ERROR Loading files: {e}')
 
 
-    ######## TRAIN TEST SPLITS ########
-    try:
-        # create train test splits - sequence clustering
-        N_SPLITS=5
-        SIM_SPLIT = 0.05
-        X = antiberty_embeddings
-        y = np.array(seq_df['group_id'])
-
-        # best splits are created with N_SPLITS=6 (based on manual inspection of train test splits)
-        train_ls, test_ls, clusters = train_test_split_idx(X, y, cluster_thresh=SIM_SPLIT, distance_matrix=distance_matrix, 
-                                                        n_splits=N_SPLITS, cluster_method= 'levenshtein_sequence_based',
-                                                        verbose=0)
-        # # manually remove an item for bad split
-        # test_ls.pop(4)
-        # train_ls.pop(4)
-        print(f'Sequence-based clustering with {SIM_SPLIT} cluster threshold')
-        for i in range(len(test_ls)):
-            print(len(test_ls[i]))
-            print(np.unique(y[test_ls[i]], return_counts=True)[1])
 
 
-        # create train test splits - Random split
-        train_ls_rd, test_ls_rd, _ = train_test_split_idx(X, y, cluster_thresh=SIM_SPLIT, n_splits=N_SPLITS, cluster_method= 'random_split',
-                                                        verbose=0)
-        print(f'Random split')
-        # test_ls_rd.pop(4)
-        # train_ls_rd.pop(4)
-        for i in range(len(test_ls_rd)):
-            print(len(test_ls_rd[i]))
-            print(np.unique(y[test_ls_rd[i]], return_counts=True)[1])
+#     ######## TRAIN TEST SPLITS ########
+#     try:
+#         # create train test splits - sequence clustering
+#         N_SPLITS=5
+#         SIM_SPLIT = 0.05
+#         X = antiberty_embeddings
+#         y = np.array(seq_df['group_id'])
+
+#         # best splits are created with N_SPLITS=6 (based on manual inspection of train test splits)
+#         train_ls, test_ls, clusters = train_test_split_idx(X, y, cluster_thresh=SIM_SPLIT, distance_matrix=distance_matrix, 
+#                                                         n_splits=N_SPLITS, cluster_method= 'levenshtein_sequence_based',
+#                                                         verbose=0)
+#         # # manually remove an item for bad split
+#         # test_ls.pop(4)
+#         # train_ls.pop(4)
+#         print(f'Sequence-based clustering with {SIM_SPLIT} cluster threshold')
+#         for i in range(len(test_ls)):
+#             print(len(test_ls[i]))
+#             print(np.unique(y[test_ls[i]], return_counts=True)[1])
 
 
-        # Summarize train test split
-        train_test_splits = [[train_ls, test_ls], [train_ls_rd, test_ls_rd]]
+#         # create train test splits - Random split
+#         train_ls_rd, test_ls_rd, _ = train_test_split_idx(X, y, cluster_thresh=SIM_SPLIT, n_splits=N_SPLITS, cluster_method= 'random_split',
+#                                                         verbose=0)
+#         print(f'Random split')
+#         # test_ls_rd.pop(4)
+#         # train_ls_rd.pop(4)
+#         for i in range(len(test_ls_rd)):
+#             print(len(test_ls_rd[i]))
+#             print(np.unique(y[test_ls_rd[i]], return_counts=True)[1])
 
-        log.info(f'Train test splits based on sequence-based clustering with {SIM_SPLIT} threshold prepared')
 
-    except Exception as e:
-        log.exception(f'ERROR TRAIN-TEST Splits: {e}')
+#         # Summarize train test split
+#         train_test_splits = [[train_ls, test_ls], [train_ls_rd, test_ls_rd]]
+
+#         log.info(f'Train test splits based on sequence-based clustering with {SIM_SPLIT} threshold prepared')
+
+#     except Exception as e:
+#         log.exception(f'ERROR TRAIN-TEST Splits: {e}')
     
 
-    ########### RUN CLASSIFICATION ###########
-    try:
-        # define embedding names
-        emb_n_list = [#'AbMAP', 
-                    #   'ESM-2', 'ESM-2-CDRextract', 
-                    #   'ESM-2-augmented', 
-                        '3-mer', #'5-mer',
-                        'Antiberty']
+#     ########### RUN CLASSIFICATION ###########
+#     try:
+#         # define embedding names
+#         emb_n_list = [#'AbMAP', 
+#                     #   'ESM-2', 'ESM-2-CDRextract', 
+#                     #   'ESM-2-augmented', 
+#                         '3-mer', #'5-mer',
+#                         'Antiberty']
 
-        # define embedding list
-        emb_list = [# Abmap_fl_embeddings, 
-            # ESM_fl_embeddings,ESM_cdr_fl_embeddings, ESM_aug_fl_embeddings, 
-            kmer_arr_3, #kmer_arr_5, 
-            antiberty_embeddings]
+#         # define embedding list
+#         emb_list = [# Abmap_fl_embeddings, 
+#             # ESM_fl_embeddings,ESM_cdr_fl_embeddings, ESM_aug_fl_embeddings, 
+#             kmer_arr_3, #kmer_arr_5, 
+#             antiberty_embeddings]
 
-        results_l = []
-        for n, pipes in zip(['', '_pca'], [[('scaler', StandardScaler())], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]):
-            for emb_name, emb in zip(emb_n_list, emb_list):
-                e = f'{emb_name}{n}'
-                X = emb
-                log.info(f'Evaluate classifier on {e} data')
-                results = run_clf_on_splits(X, y, train_test_splits, SIM_SPLIT, emb_name=e, RF=True,
-                                            pipe_ls = pipes, log=log)
-                results_l.append(results)
+#         results_l = []
+#         for n, pipes in zip(['', '_pca'], [[('scaler', StandardScaler())], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]):
+#             for emb_name, emb in zip(emb_n_list, emb_list):
+#                 e = f'{emb_name}{n}'
+#                 X = emb
+#                 log.info(f'Evaluate classifier on {e} data')
+#                 results = run_clf_on_splits(X, y, train_test_splits, SIM_SPLIT, emb_name=e, RF=True,
+#                                             pipe_ls = pipes, log=log)
+#                 results_l.append(results)
 
-                # save intermediate result
-                results = pd.concat(results_l)
-                results.to_csv(os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/{today}_{c_type}_Spec_classification_CV_results.csv'), index=False)
+#                 # save intermediate result
+#                 results = pd.concat(results_l)
+#                 results.to_csv(os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/{today}_{c_type}_Spec_classification_CV_results.csv'), index=False)
 
-        log.info(f'Evaluation done')
+#         log.info(f'Evaluation done')
 
-    except Exception as e:
-        log.exception(f'ERROR Running classifier {emb_name}: {e}')
+#     except Exception as e:
+#         log.exception(f'ERROR Running classifier {emb_name}: {e}')
 
-    ########### SAVE RESULTS ###########
+#     ########### SAVE RESULTS ###########
 
 
-    # results = pd.concat(results_l)
-    # results.to_csv(os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/{today}_{c_type}_Spec_classification_CV_results.csv'), index=False)
+#     # results = pd.concat(results_l)
+#     # results.to_csv(os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/{today}_{c_type}_Spec_classification_CV_results.csv'), index=False)
 
-    # log.info(f'Results saved in {os.path.join(ROOT_DIR, f"data/model_evaluation/Specificity_Classification/{today}_{c_type}_Spec_classification_CV_results.csv")}')
+#     # log.info(f'Results saved in {os.path.join(ROOT_DIR, f"data/model_evaluation/Specificity_Classification/{today}_{c_type}_Spec_classification_CV_results.csv")}')
 
 
 
@@ -859,7 +859,7 @@ def run():
 
 
 def main():
-    run()
+    pass
 
 
 

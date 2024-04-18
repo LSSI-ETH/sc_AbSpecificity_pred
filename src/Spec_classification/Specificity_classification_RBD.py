@@ -13,17 +13,22 @@ from datetime import datetime
 import random
 import configparser
 
+# add parser
+parser = argparse.ArgumentParser(description='Run classification models to predict Binding Specificity for OVA values from sequence embeddings')
+parser.add_argument('--config', type=str, default='/data/cb/scratch/lenae/sc_AbSpecificity_pred/config_file.txt', help='Path to the config file')
+parser.add_argument('--simsplit_tresh', type=float, default=0.05, help='Similarity split threshold; default 0.05')
+parser.add_argument('--out_path', type=str, default='data/model_evaluation/Specificity_classification/RBD/', help='Output path for results')
 
 
 # add root directory to path such that the utils_nb file can be imported
-CONFIG_PATH = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks/config_file_RBD.txt'
-UTILS_DIR = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks'
+CONFIG_PATH = parser.parse_args().config 
+UTILS_DIR = '/data/cb/scratch/lenae/sc_AbSpecificity_pred/src'
 sys.path.append(UTILS_DIR)
 sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
 
 
 # import custom modules
-import utils_nb as utils
+import sc_AbSpecificity_pred.src.utils_nb as utils
 import Load_embs_class as lec
 import Specificity_classification_class as CLF
 
@@ -128,7 +133,7 @@ def run():
         try:
             # create train test splits - sequence clustering
             N_SPLITS=5
-            SIM_SPLIT = 0.05
+            SIM_SPLIT = parser.parse_args().simsplit_tresh
 
                 
             X = ESM_fl_embeddings
@@ -187,7 +192,7 @@ def run():
                 antiberty_embeddings]
             
             # define file path
-            file_path = os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/RBD/{today}_{c_type}_RF_Spec_classification_CV_results.csv')
+            file_path = os.path.join(ROOT_DIR, parser.out_path,f'{today}_{c_type}_Spec_classification_CV_results.csv')
 
             results_l = []
             for n, pipes in zip(['', '_pca'], [[('scaler', StandardScaler())], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]):

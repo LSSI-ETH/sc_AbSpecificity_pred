@@ -22,7 +22,7 @@ UTILS_DIR = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks'
 sys.path.append(UTILS_DIR)
 sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
 
-import utils_nb as utils
+import sc_AbSpecificity_pred.src.utils_nb as utils
 import utils_abmap_analysis as utilsa
 
 

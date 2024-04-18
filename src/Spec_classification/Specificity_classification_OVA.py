@@ -15,16 +15,21 @@ import random
 import configparser
 
 
+# add parser
+parser = argparse.ArgumentParser(description='Run classification models to predict Binding Specificity for OVA values from sequence embeddings')
+parser.add_argument('--config', type=str, default='/data/cb/scratch/lenae/sc_AbSpecificity_pred/config_file.txt', help='Path to the config file')
+parser.add_argument('--simsplit_tresh', type=int, default=0.05, help='Similarity split threshold; default 0.05')
+parser.add_argument('--out_path', type=str, default='data/model_evaluation/Specificity_classification/RBD/', help='Output path for results')
 
 # add root directory to path such that the utils_nb file can be imported
-CONFIG_PATH = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks/config_file.txt'
-UTILS_DIR = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks'
+CONFIG_PATH = parser.parse_args().config 
+UTILS_DIR = '/data/cb/scratch/lenae/sc_AbSpecificity_pred/src'
 sys.path.append(UTILS_DIR)
 sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
 
 
 # import custom modules
-import utils_nb as utils
+import sc_AbSpecificity_pred.src.utils_nb as utils
 import utils_abmap_analysis as utilsa
 import Load_embs_class as lec
 import Specificity_classification_class as CLF
@@ -34,7 +39,6 @@ from sklearn.decomposition import PCA
 
 
 def run():
-
 
     # set random seed
     random.seed(123)
@@ -126,7 +130,7 @@ def run():
         try:
             # create train test splits - sequence clustering
             N_SPLITS=5
-            SIM_SPLIT = 0.05
+            SIM_SPLIT = parser.parse_args().simsplit_tresh
             X = ESM_fl_embeddings
             y = np.array(seq_df['group_id'])
 
@@ -166,29 +170,28 @@ def run():
         ########### RUN CLASSIFICATION ###########
         try:
             # define embedding names
-            emb_n_list = [#'AbMAP', 
-                          'ESM-2', 'ESM-2-CDRextract', 
+            emb_n_list = ['ESM-2', 'ESM-2-CDRextract', 
                           'ESM-2-augmented', 
                           '3-mer', '2-mer',
                           'Antiberty']
 
             # define embedding list
-            emb_list = [# Abmap_fl_embeddings, 
-                ESM_fl_embeddings,ESM_cdr_fl_embeddings, ESM_aug_fl_embeddings, 
+            emb_list = [ESM_fl_embeddings,ESM_cdr_fl_embeddings, ESM_aug_fl_embeddings, 
                 kmer_arr_3, kmer_arr_2, 
                 antiberty_embeddings]
 
             # define file path
-            file_path = os.path.join(ROOT_DIR, f'data/model_evaluation/Specificity_classification/{today}_{c_type}_RF_OVA_Spec_classification_CV_results.csv')
+            file_path = os.path.join(ROOT_DIR, parser.out_path,f'{today}_{c_type}_Spec_classification_CV_results.csv')
 
 
             results_l = []
             for n, pipes in zip(['', '_pca'], [[('scaler', StandardScaler())], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]):
                 for emb_name, emb in zip(emb_n_list, emb_list):
+                    for rf in [None, True]:
                     e = f'{emb_name}{n}'
                     X = emb
                     log.info(f'Evaluate classifier on {e} data')
-                    results = CLF.run_clf_on_splits(X, y, train_test_splits, SIM_SPLIT, emb_name=e, RF=True,
+                    results = CLF.run_clf_on_splits(X, y, train_test_splits, SIM_SPLIT, emb_name=e, RF=rf,
                                                 pipe_ls = pipes, log=log)
                     results_l.append(results)
 
