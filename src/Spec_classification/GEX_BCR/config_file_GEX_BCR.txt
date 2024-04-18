@@ -1,7 +1,7 @@
 [ROOT]
-ROOT_DIR: /data/cb/scratch/lenae/p-GP-LLM-AbPred/
-LOAD_CLASS_DIR: /data/cb/scratch/lenae/p-GP-LLM-AbPred/src/models/Spec_classification
-UTILS_DIR: /data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks
+ROOT_DIR: /data/cb/scratch/lenae/sc_AbSpecificity_pred/
+LOAD_CLASS_DIR: /data/cb/scratch/lenae/sc_AbSpecificity_pred/src/Spec_classification/
+UTILS_DIR: /data/cb/scratch/lenae/sc_AbSpecificity_pred/src/
 
 # relative paths
 [PATHS]
@@ -14,21 +14,5 @@ OVA: data/processed/GEX/OVA_BCR_GEX_feats2024-01-22.csv
 RBD: data/processed/GEX/RBD_BCR_GEX_feats2024-01-22.csv
 INTEGRATED: data/processed/GEX/OVA_RBD_int_BCR_GEX_feats2024-01-22.csv
 
-#[DIST_MATRIX]
-#OVA: data/processed/distance_matrix_OVA_VDJ_VJaaSeqs_2023-10-17.csv
-#RBD: data/processed/distance_matrix_RBD_VDJ_VJaaSeqs_2023-10-17.csv
 
-#[VH_VL_EMBEDPATH]
-#AbMAP_100_fl: data/processed/embeddings/AbMAP_k_100_VH_VL_fixed/
-#AbMAP_100_var: data/processed/embeddings/AbMAP_k_100_VH_VL_variable/
-#ESM2_var: data/processed/embeddings/esm2_VH_VL/
-#ESM2_aug_100_var: data/processed/embeddings/esm2_aug_100_VH_VL/
-#ESM2_CDRextract: data/processed/embeddings/esm2_fl_VH_VL_CDRs/
 
-#[VH_EMBEDPATH]
-#AbMAP_100_fl: data/processed/embeddings/VH/AbMAP_k_100_VH_fixed/
-#AbMAP_100_var: data/processed/embeddings/VH/AbMAP_k_100_VH_variable/
-#ESM2_var: data/processed/embeddings/VH/esm2_VH/
-#ESM2_aug_100_var: data/processed/embeddings/VH/esm2_aug_100_VH/
-#ESM2_CDRextract: data/processed/embeddings/VH/esm2_fl_VH_CDRs/
-#DISTANCE_MATRIX: data/processed/distance_matrix_OVA_VDJ_aaSeqs_2023-11-08.csv

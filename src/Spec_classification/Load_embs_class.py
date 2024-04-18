@@ -18,12 +18,12 @@ import configparser
 
 
 # add root directory to path such that the utils_nb file can be imported
-UTILS_DIR = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks'
+UTILS_DIR = './sc_AbSpecificity_pred/src/'
 sys.path.append(UTILS_DIR)
 sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
 
-import sc_AbSpecificity_pred.src.utils_nb as utils
-import utils_abmap_analysis as utilsa
+import utils_nb as utils
+
 
 
 
@@ -50,15 +50,11 @@ class LoadEmbeddings_VH_VL:
 
 
 
-        # Set input path - AbMap & ESM-2 embeddings
-        self.emb_inputPath_AM = os.path.join(self.ROOT_DIR, config[config_dir]['AbMAP_100_fl'])
+        # Set input path - ESM-2 embeddings
         self.emb_inputPath_ESM = os.path.join(self.ROOT_DIR, config[config_dir]['ESM2_var'])
 
         # CDR extracted embeddings
         self.emb_inputPath_ESM_cdrs = os.path.join(self.ROOT_DIR, config[config_dir]['ESM2_CDRextract'])
-
-        # ESM augmented embeddings
-        self.emb_inputPath_ESM_aug = os.path.join(self.ROOT_DIR, config[config_dir]['ESM2_aug_100_var'])
 
         # Antiberty embeddings
         self.emb_inputPath_antiberty = os.path.join(self.ROOT_DIR, config[config_dir]['ANTIBERTY'])
@@ -103,42 +99,23 @@ class LoadEmbeddings_VH_VL:
         if self.seq_col == 'VDJ_VJ_aaSeq': 
             if verbose is True: print("Load embeddings for VH_VL sequences")
             
-            # iterate through all embeddings and load them
-            if embedding_type == 'all' or embedding_type == 'abmap':
-
-                ### AbMAP - VH_VL --> FL is a concatenation of the embeddings of VH_VL
-                embeddings_AbMAP_fl_c = utils.load_pickle_embeddings(self.names, self.emb_inputPath_AM)
-                # average embeddings of VH and VL (for comparison with ESM2)
-                self.emb_AM = np.array(embeddings_AbMAP_fl_c).reshape(len(embeddings_AbMAP_fl_c), -1, 2).mean(2)
-                # embedding is concatenated --> for comparison take mean across VH&VL
-                if verbose is True: print("AbMAP - VH_VL embeddings loaded")
-
-            
+            # iterate through all embeddings and load them            
             if embedding_type == 'all' or embedding_type == 'esm':
                 ### ESM2 - VH_VL
                 self.emb_ESM_var = utils.load_pickle_embeddings_VH_VL(self.names, self.emb_inputPath_ESM, embedding_type = 'var')
-                self.emb_ESM = utilsa.mean_over_HL(self.emb_ESM_var) # average embeddings over across seq_len & VH+VL
+                self.emb_ESM = utils.mean_over_HL(self.emb_ESM_var) # average embeddings over across seq_len & VH+VL
                 if verbose is True: print("ESM - VH_VL embeddings loaded")
 
             if embedding_type == 'all' or embedding_type == 'esm_cdrs':
                 ### ESM2 CDR - VH_VL
                 embeddings = utils.load_pickle_embeddings(self.names, self.emb_inputPath_ESM_cdrs)
                 self.emb_ESM_cdrs = np.array(embeddings)
-                if verbose is True: print("ESM CDRextract - embeddings VH_VL loaded")
-            
-            if embedding_type == 'all' or embedding_type == 'esm_aug':
-                ### ESM2 augmented - VH_VL
-                embeddings_aug_raw = utils.load_pickle_embeddings_VH_VL(self.names, self.emb_inputPath_ESM_aug, file_suffix= '', embedding_type = 'var')
-                # these embeddings have 4 more dimensions than the original ESM embeddings --> trimm
-                embeddings_aug_var = [[emb_HL[0][:, :1280], emb_HL[1][:, :1280]] for emb_HL in embeddings_aug_raw]
-                # get mean fixed length embedding for heavy and light chain sequences
-                self.emb_ESM_aug = utilsa.mean_over_HL(embeddings_aug_var)
-                if verbose is True: print("ESM augmented - VH_VL embeddings loaded")
+                if verbose is True: print("ESM CDRextract - embeddings VH_VL loaded")            
             
             if embedding_type == 'all' or embedding_type == 'antiberty':
                 ### Antiberty - VH_VL
                 self.emb_antiberty_var = utils.load_pickle_embeddings_VH_VL(self.names, self.emb_inputPath_antiberty,  file_suffix = '', embedding_type = 'var')
-                self.emb_antiberty = utilsa.mean_over_HL(self.emb_antiberty_var)
+                self.emb_antiberty = utils.mean_over_HL(self.emb_antiberty_var)
                 if verbose is True: print("Antiberty - VH_VL embeddings loaded")
 
 
@@ -149,11 +126,6 @@ class LoadEmbeddings_VH_VL:
             self.names = [f'{n}{VH_emb_fname_suff}' for n in self.names]
 
             # iterate through all embeddings and load them
-            if embedding_type == 'all' or embedding_type == 'abmap':
-                ### AbMAP - VH 
-                self.emb_AM = np.array(utils.load_pickle_embeddings(self.names, self.emb_inputPath_AM))
-                if verbose is True: print("AbMAP - VH embeddings loaded")
-
             if embedding_type == 'all' or embedding_type == 'esm':
                 ### ESM2 - VH 
                 self.emb_ESM_var = utils.load_pickle_embeddings(self.names, self.emb_inputPath_ESM)
@@ -164,15 +136,7 @@ class LoadEmbeddings_VH_VL:
                 ### ESM2 CDR - VH
                 embeddings = utils.load_pickle_embeddings(self.names, self.emb_inputPath_ESM_cdrs)
                 self.emb_ESM_cdrs = np.array(embeddings)
-                if verbose is True: print("ESM CDRextract - VH embeddings loaded")
-
-            if embedding_type == 'all' or embedding_type == 'esm_aug':
-                ### ESM2 augmented - VH 
-                embeddings_aug_raw_H = utils.load_pickle_embeddings(self.names, self.emb_inputPath_ESM_aug, file_suffix = '_k100')
-                # these embeddings ave 4 more dimensions than the original ESM embeddings --> trimm
-                embeddings_aug_var_H = [emb[:, :1280] for emb in embeddings_aug_raw_H]
-                self.emb_ESM_aug = np.array([emb.mean(0) for emb in embeddings_aug_var_H]) #  average over the sequence length
-                if verbose is True: print("ESM augmented - VH embeddings loaded")
+                if verbose is True: print("ESM CDRextract - VH embeddings loaded")            
             
             if embedding_type == 'all' or embedding_type == 'antiberty':
                 ### Antiberty - VH
@@ -188,26 +152,26 @@ class LoadEmbeddings_VH_VL:
 
 
 
-# test the class
 
 if __name__ == '__main__':
 
-    CONFIG_PATH = '/data/cb/scratch/lenae/p-GP-LLM-AbPred/notebooks/config_file.txt'
-    HL_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True)
-    # print(HL_class.names[120:128])
-    # HL_class.load_embeddings(embedding_type = 'antiberty')
-    # print(HL_class.emb_antiberty.shape)
-    # print()
-    # print(HL_class.emb_AM.shape)
-    # print(HL_class.emb_ESM.shape)
-    # print(HL_class.emb_ESM_aug.shape)
-    # print(HL_class.emb_ESM_cdrs.shape)
+
+    def test():
+        
+        # test the class
+        CONFIG_PATH = './src/config_file.txt'
+        HL_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True)
+        # print(HL_class.names[120:128])
+        # HL_class.load_embeddings(embedding_type = 'antiberty')
+        # print(HL_class.emb_antiberty.shape)
+        # print()
+        # print(HL_class.emb_ESM.shape)
+        # print(HL_class.emb_ESM_cdrs.shape)
 
 
-    H_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True) 
-    H_class.load_embeddings(embedding_type = 'antiberty')   
-    # print(H_class.emb_AM.shape)
-    # print(H_class.emb_ESM.shape)
-    # # print(H_class.emb_ESM_aug.shape)
-    # print(H_class.emb_ESM_cdrs.shape)
-    print(H_class.emb_antiberty.shape)
+        H_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True) 
+        H_class.load_embeddings(embedding_type = 'antiberty')   
+        # print(H_class.emb_AM.shape)
+        # print(H_class.emb_ESM.shape)
+        # print(H_class.emb_ESM_cdrs.shape)
+        print(H_class.emb_antiberty.shape)

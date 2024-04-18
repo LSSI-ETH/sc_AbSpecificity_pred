@@ -1,0 +1,5 @@
+Model,group_thresh,train_test_split,accuracy,accuracy_std,MCC,MCC_std,F1,F1_std,precision,precision_std,recall,recall_std,roc_pr,roc_pr_std,roc_auc,roc_auc_std
+LogReg_ESM-2,0.05,levenshtein_sequence_based,0.767,0.034,0.191,0.079,0.319,0.07,0.322,0.099,0.344,0.106,0.148,0.053,0.6,0.047
+kSVC_ESM-2,0.05,levenshtein_sequence_based,0.766,0.059,0.057,0.135,0.162,0.095,0.265,0.209,0.137,0.085,0.165,0.053,0.517,0.059
+LogReg_ESM-2,0.05,random_split,0.816,0.018,0.472,0.03,0.573,0.023,0.49,0.033,0.694,0.009,0.146,0.001,0.768,0.011
+kSVC_ESM-2,0.05,random_split,0.79,0.013,0.198,0.049,0.314,0.044,0.375,0.048,0.272,0.044,0.157,0.004,0.587,0.022

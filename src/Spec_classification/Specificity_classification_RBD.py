@@ -15,16 +15,16 @@ import configparser
 
 # add parser
 parser = argparse.ArgumentParser(description='Run classification models to predict Binding Specificity for OVA values from sequence embeddings')
-parser.add_argument('--config', type=str, default='/data/cb/scratch/lenae/sc_AbSpecificity_pred/config_file.txt', help='Path to the config file')
+parser.add_argument('--config', type=str, default='config_file.txt', help='Path to the config file')
 parser.add_argument('--simsplit_tresh', type=float, default=0.05, help='Similarity split threshold; default 0.05')
-parser.add_argument('--out_path', type=str, default='data/model_evaluation/Specificity_classification/RBD/', help='Output path for results')
+parser.add_argument('--out_path', type=str, default='data/model_evaluation/Specificity_classification/', help='Output path for results')
 
 
 # add root directory to path such that the utils_nb file can be imported
 CONFIG_PATH = parser.parse_args().config 
 UTILS_DIR = '/data/cb/scratch/lenae/sc_AbSpecificity_pred/src'
 sys.path.append(UTILS_DIR)
-sys.path.append(os.path.join(UTILS_DIR, 'AbMAP_analysis'))
+
 
 
 # import custom modules

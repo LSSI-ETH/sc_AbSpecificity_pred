@@ -130,6 +130,22 @@ def load_pickle_embeddings_VH_VL(names, inputPath, embedding_type = 'fixed', fil
 
 
 
+### TAKES THE MEAN OVER HEAVY AND LIGHT CHAIN EMBEDDING & RETURNS THE FIXED-LENGTH EMBEDDING
+###
+
+def mean_over_HL(embeddings):
+
+    # take mean over HL and var embeddings to get fixed length embeddings
+    fl_embeddings = []
+
+    for i, emb in enumerate(embeddings):
+        # vstack H and L embeddings and take mean over embeddings for a fixed lenght
+        fl_emb_chains = np.vstack((emb[0], emb[1]))
+
+        fl_embeddings.append(fl_emb_chains.mean(0))
+
+    return np.array(fl_embeddings)
+
 
 
 # combination of functions for calculating kmer frequencies
