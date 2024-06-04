@@ -41,7 +41,8 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn.metrics import pairwise_distances, auc, accuracy_score, f1_score, precision_score, recall_score, matthews_corrcoef , RocCurveDisplay, roc_auc_score, average_precision_score
+from sklearn.metrics import pairwise_distances, auc, accuracy_score, f1_score, precision_score, recall_score, matthews_corrcoef 
+from sklearn.metrics import RocCurveDisplay, roc_auc_score, average_precision_score, precision_recall_curve
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
@@ -330,6 +331,16 @@ class Specificity_classificiation_model_evaluation:
         metric_dict['roc_auc'] = roc_auc
         metric_dict['roc_pr'] = roc_pr
 
+
+        # add PR AUC
+        ### add hard code AUC PR Curve
+        self.y_pred_proba = self.best_model.predict_proba(X_test)[:, 1]
+        # Step 5: Compute Precision and Recall for different thresholds.
+        precision, recall, thresholds = precision_recall_curve(y_test, self.y_pred_proba)
+        # Step 6: Calculate Area Under the PR curve.
+        pr_auc = auc(recall, precision)
+        metric_dict['hardcoded_roc_pr'] = pr_auc
+
         if verbose >0:
             # print scores
             print("Test Accuracy:", np.round(accuracy, 3))
@@ -338,6 +349,17 @@ class Specificity_classificiation_model_evaluation:
             print("Test Recall:", np.round(rec, 3))
             print("Test ROC_AUC:", np.round(roc_auc, 3))
             print("Test ROC_PR:", np.round(roc_pr, 3))
+
+            # Print the PR AUC
+            print(f'hard coded PR AUC: {np.round(pr_auc, 3)}')
+
+        # # Plot the Precision-Recall curve.
+        # plt.plot(recall, precision, marker='.', label='Logistic')
+        # plt.xlabel('Recall')
+        # plt.ylabel('Precision')
+        # plt.title('Precision-Recall curve')
+        # plt.legend()
+        # plt.show()
 
         return metric_dict
 
@@ -350,7 +372,7 @@ class Specificity_classificiation_model_evaluation:
 
         
         metric_dict_Log = {}
-        metrics_ls = ['accuracy', 'MCC', 'F1', 'precision', 'recall', 'roc_pr', 'roc_auc']
+        metrics_ls = ['accuracy', 'MCC', 'F1', 'precision', 'recall', 'roc_pr', 'roc_auc', 'hardcoded_roc_pr']
         for k in metrics_ls:
             metric_dict_Log[k] = []
 
