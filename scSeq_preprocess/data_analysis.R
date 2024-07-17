@@ -18,10 +18,8 @@ source("utils.R")
 mixcr.directory <- "/usr/local/Cellar/mixcr/4.2.0-1/mixcr"
 
 # cellranger output files
-cellranger_out_path <- paste0("/Users/lerlach/Documents/current_work/OVA_seq/aligned_data/OVA_specific/")
+# cellranger_out_path <- paste0("/Users/lerlach/Documents/current_work/OVA_seq/aligned_data/OVA_specific/")
 vgm_out_path <- paste0(getwd() , "/Analysis_test/")
-
-ifelse(!dir.exists(file.path(vgm_out_path)), dir.create(file.path(vgm_out_path), recursive = TRUE), FALSE)
 
 
 # define path to save plots to 
@@ -68,13 +66,13 @@ library(Platypus)
 # Load file - START OF ANALYSIS
 ########################################################
 
-VDJ_GEX_matrix <- readRDS(paste0(vgm_out_path, "VDJ_GEX_OVAspec_harmony_mixcraligned.rds"))
-
+VDJ_GEX_matrix <- readRDS("/Users/lerlach/Documents/current_work/OVA_seq/OVA_RBD_Wuhan_integrated/Analysis/Modelling/data/VDJ_GEX_object_OVA_RBD_harmony_overlapping_clones_rm.rds")
+ 
 
 
 # just rename GEX dataset & VDJ dataset
-pbmc <- VDJ_GEX_matrix[["GEX"]]
-VDJ_mat <- subset(VDJ_GEX_matrix[["VDJ"]], Nr_of_VDJ_chains == 1 & Nr_of_VJ_chains == 1)
+pbmc <- VDJ_GEX_matrix[[1]]
+VDJ_mat <- VDJ_GEX_matrix[[2]]
  
 
 
@@ -121,11 +119,14 @@ VDJ_mat <- subset(VDJ_GEX_matrix[["VDJ"]], Nr_of_VDJ_chains == 1 & Nr_of_VJ_chai
 
 # UMAPs with just showing sample 1&3
 Idents(pbmc) <- "sample_id"
-s1_high <- WhichCells(pbmc, ident = c("s1"))
-s3_high <- WhichCells(pbmc, ident = c("s3"))
+s1_high <- WhichCells(pbmc, ident = c("s1_OVA", "s3_OVA"))
+s1R_high <- WhichCells(pbmc, ident = c("s1_RBD"))
 
-plot1 <- DimPlot(pbmc, reduction = "umap", cells.highlight= list(s1_high, s3_high), pt.size = 1) +
-  scale_color_manual(labels = c("Others", "S3", "S1"), values = c("grey", "darkblue", "darkred"))
+
+
+plot1 <- DimPlot(pbmc, reduction = "umap", cells.highlight= list(s1_high,s1R_high), pt.size = 1) +
+  scale_color_manual(labels = c("Others", "OVA_spec", "RBD_sepc"), values = c("grey", "darkblue", "darkred"))
+plot1
 ggsave(filename=paste0(save_path_GEX, "UMAP_OVA_RBD_spec.pdf"),plot=plot1)
 
 
