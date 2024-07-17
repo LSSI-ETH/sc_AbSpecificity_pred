@@ -154,24 +154,25 @@ class LoadEmbeddings_VH_VL:
 
 
 if __name__ == '__main__':
+    pass
 
 
-    def test():
+    # def test():
         
-        # test the class
-        CONFIG_PATH = './src/config_file.txt'
-        HL_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True)
-        # print(HL_class.names[120:128])
-        # HL_class.load_embeddings(embedding_type = 'antiberty')
-        # print(HL_class.emb_antiberty.shape)
-        # print()
-        # print(HL_class.emb_ESM.shape)
-        # print(HL_class.emb_ESM_cdrs.shape)
+    #     # test the class
+    #     CONFIG_PATH = './src/config_file.txt'
+    #     HL_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True)
+    #     # print(HL_class.names[120:128])
+    #     # HL_class.load_embeddings(embedding_type = 'antiberty')
+    #     # print(HL_class.emb_antiberty.shape)
+    #     # print()
+    #     # print(HL_class.emb_ESM.shape)
+    #     # print(HL_class.emb_ESM_cdrs.shape)
 
 
-        H_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True) 
-        H_class.load_embeddings(embedding_type = 'antiberty')   
-        # print(H_class.emb_AM.shape)
-        # print(H_class.emb_ESM.shape)
-        # print(H_class.emb_ESM_cdrs.shape)
-        print(H_class.emb_antiberty.shape)
+    #     H_class = LoadEmbeddings_VH_VL(CONFIG_PATH, seq_col='VDJ_aaSeq', filter_192 = True, filter_VH_complete = True) 
+    #     H_class.load_embeddings(embedding_type = 'antiberty')   
+    #     # print(H_class.emb_AM.shape)
+    #     # print(H_class.emb_ESM.shape)
+    #     # print(H_class.emb_ESM_cdrs.shape)
+    #     print(H_class.emb_antiberty.shape)

@@ -81,7 +81,6 @@ def load_pickle_embeddings_wo_p(names, inputPath, verbose=False):
         except Exception as e:
             print(f"An error occurred while loading {file_name}: {str(e)}")
     
-#     embeddings = [x.numpy() for x in loaded_data]
     return loaded_data
 
 
@@ -204,13 +203,13 @@ class Logger:
 
 
 ########################################################################
-### GENERATE EMBEDDINGS WITH ESM, ESM-AUG AND AbMAP - CUSTOM FUNCTIONS
+### GENERATE EMBEDDINGS WITH ESM and CDR Extract - CUSTOM FUNCTIONS
 ########################################################################
 
 
 # prep data for ESM Embedding
 def generate_ESM_embedding(df, seq_column_HC='VDJ_aaSeq', seq_column_LC='VJ_aaSeq', 
-                                k = 50, model_typ = 'esm2', 
+                                augment = True, k = 50, model_typ = 'esm2', 
                                 out_folder = 'embeddings/', VH_only = False, save_plm=True, save_PLM_aug=True,
                                 cuda_dev_num = 0): 
     '''
@@ -273,17 +272,19 @@ def generate_ESM_embedding(df, seq_column_HC='VDJ_aaSeq', seq_column_LC='VJ_aaSe
 
 
 
-                prot_embed.create_cdr_mask()
-                kmut_matr = prot_embed.create_kmut_matrix(num_muts=k, embed_type=model_typ)
-                cdr_embed = prot_embed.create_cdr_embedding(kmut_matr, sep = False, mask = True)
+                # augment the PLM embeddings with AbMAP
+                if augment is True:
+                    prot_embed.create_cdr_mask()
+                    kmut_matr = prot_embed.create_kmut_matrix(num_muts=k, embed_type=model_typ)
+                    cdr_embed = prot_embed.create_cdr_embedding(kmut_matr, sep = False, mask = True)
 
-                # save ids and embeddings as list for AbMap embeddings
-                emb_ids.append(p_id)
-                aug_esm_embeddings_VH_VL[file_name] = cdr_embed
+                    # save ids and embeddings as list for AbMap embeddings
+                    emb_ids.append(p_id)
+                    aug_esm_embeddings_VH_VL[file_name] = cdr_embed
 
 
-                with open(os.path.join(out_path_aug, p_id), 'wb') as f:
-                    pickle.dump(cdr_embed.cpu().numpy(), f)
+                    with open(os.path.join(out_path_aug, p_id), 'wb') as f:
+                        pickle.dump(cdr_embed.cpu().numpy(), f)
 
                 # except:
                 #     ids_to_drop.append(index)
@@ -465,6 +466,175 @@ def generate_AbMAP_embedding(df, aug_esm_embeddings_VH_VL, ids_to_drop, seq_colu
     abmap.utils.log("# AbMap embedding done!")  
     
     return abmap_emb_H_L_fl
+
+
+
+### CDR Extract - CUSTOM FUNCTIONS
+
+
+def get_anarci_numbering(sequence, anarci_dir, all_regions, chain_type='H', scheme = 'chothia', buffer_region=False,
+                          dev=0, verbose=0):
+    
+    '''
+    Function for generating ESM embeddings and augmenting them with contrastive augmentation. 
+    Also saves the variable length embeddings in out_folder;
+    
+    params:
+            sequence: str, of the heavy or light chain antibody sequence
+            anarci_dir: str, path to where temp anarci files are stored
+            chain_type: str, 'H' indicating heavy chain sequence, 'L' indicating heavy chain sequence
+            all_regions: dict(list), dict containing the start and stop numbering of the CDRs 
+            dev: str, just a name for creating a anarci file
+    
+    '''
+    
+    if not os.path.isdir(anarci_dir):
+        os.makedirs(anarci_dir)
+            
+    
+    # # add 1 aa as buffer region --> false per default
+    if buffer_region == True:
+        for c_type in all_regions.keys():
+            for i, cdr_region in enumerate(all_regions[c_type]):
+                all_regions[c_type][i][0] -= 1
+                all_regions[c_type][i][1] += 1
+
+
+    regions = all_regions[chain_type]
+    
+    if verbose > 0: print('Run ANARCI')
+    # Output ANARCI file for an individual sequence
+    temp_name = os.path.join(anarci_dir, 'temp{}'.format(dev))
+    os.system('ANARCI -i {} --csv -o {} -s {}'.format(sequence, temp_name, scheme))
+
+    # Find filename of ANARCI output
+    if chain_type == 'H':
+        file_name = f'{temp_name}_H.csv'
+    else:
+        file_name = f'{temp_name}_KL.csv'
+
+    try:
+        temp = pd.read_csv(file_name)
+    except:
+        print("Can't READ this file! file name is: {}".format(file_name))
+        raise ValueError
+        
+        
+    df = pd.DataFrame(temp)
+
+    prot = df.iloc[:, 13:]  # important data starting at 13th col.
+    # turn columns in numbered pd.Series
+    columns = pd.Series(prot.columns)
+    num_lst = []
+
+    if verbose > 0: print('Extract CDR embeddings')
+    for r in regions: 
+        # get start and stop +1 AA outside of CDRs
+        start = int(columns.index.values[columns == str(r[0])])
+        stop = int(columns.index.values[columns == str(r[1])])
+        if verbose > 0: print(sequence[start:stop])
+        
+        num_lst.append([start,stop])
+
+        
+    return num_lst
+
+
+
+
+def extract_cdr_embedding(seqs_H: list, seqs_L: list, names: list, embeddings: list, anarci_dir: str, all_regions: str, 
+                              emb_outputPath: str, save_embeddings=False, paired_chains=True, verbose: int =0):
+    '''
+    Function for extracting the CDR embeddings using ANARCI. 
+    It returns the fixed length embedding by taking the mean over the embedding. 
+    params:
+            seqs_H: list, list of heavy and light chain sequences
+            seqs_L: list, list of light and light chain sequences
+            names: list, list of sequence ids
+            embeddings: list of np.array of shape (seq_len, n_dim)
+            save_embeddings: bool, if embeddings should be saved
+            emb_outputPath: str, path to where embeddings should be saved
+            anarci_dir: str, path to where temp anarci files are stored
+            all_regions: dict(list), dict containing the start and stop numbering of the CDRs 
+    returns:
+            fl_embeddings: list of np.array of shape (n_dim, ) fixed length/sequence level embeddings 
+    
+
+    '''
+    embeddings_var = []
+    
+    if paired_chains == True:
+        print('paired')
+        assert len(seqs_H) == len(seqs_L), "List of heavy and light chain seqs not equal"  
+
+        for seq_H, seq_L, embs in tqdm(zip(seqs_H, seqs_L, embeddings), total=len(seqs_H)):
+        #     print(seq_H)
+        #     print(seq_L)
+            embedding_H = embs[0]
+            embedding_L = embs[1]
+
+            
+            fl_emb_chains = []
+            for chain_type, sequence in zip(['H', 'L'], [seq_H, seq_L]):
+                
+                # get start and stop indicators of the CDRs
+                num_lst = get_anarci_numbering(sequence, anarci_dir, all_regions = all_regions,
+                                                    chain_type=chain_type, scheme = 'chothia', dev=0, verbose=0)
+
+                if chain_type == 'H':
+                    cdr_emb = [embedding_H[num[0]:num[1]+1] for num in num_lst]
+                    
+                elif chain_type == 'L':
+                    cdr_emb = [embedding_L[num[0]:num[1]+1] for num in num_lst]
+
+                # vstack H and L embeddings and take mean over embeddings for a fixed lenght
+                fl_emb_chains.append(np.vstack((cdr_emb[0], cdr_emb[1], cdr_emb[2])))
+            
+            embeddings_var.append(fl_emb_chains)
+
+        # get mean over all embeddings
+        fl_embeddings = mean_over_HL(embeddings_var)
+        
+        
+    else: 
+        print('else')
+        for seq_H, embs in tqdm(zip(seqs_H, embeddings), total=len(seqs_H)):
+        #     print(seq_H)
+        #     print(seq_L)
+            embedding_H = embs
+            
+            # get start and stop indicators of the CDRs
+            num_lst = get_anarci_numbering(seq_H, anarci_dir, all_regions = all_regions,
+                                                chain_type='H', scheme = 'chothia', dev=0, verbose=0)
+
+            cdr_emb = [embedding_H[num[0]:num[1]+1] for num in num_lst]
+
+            # vstack H and L embeddings and take mean over embeddings for a fixed lenght
+            embeddings_var.append(np.vstack((cdr_emb[0], cdr_emb[1], cdr_emb[2])))
+
+            fl_embeddings = [emb.mean(axis=0) for emb in embeddings_var]
+
+
+    ### save embeddings
+    if save_embeddings == True:
+        if not os.path.isdir(emb_outputPath):
+                os.makedirs(emb_outputPath)
+        print('saved to ', emb_outputPath)
+              
+        for emb, name in zip(fl_embeddings, names):
+            fname = os.path.join(emb_outputPath, f'{name}.p') 
+            # save the abmap embedding
+            with open(fname, 'wb') as f:
+                pickle.dump(emb, f)
+
+
+
+    return fl_embeddings
+
+
+
+
+
 
 
 
