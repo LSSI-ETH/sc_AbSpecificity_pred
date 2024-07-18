@@ -43,5 +43,6 @@ config_*.txt
 # Custom folders #
 ############
 data/processed/embeddings/*
+data/processed/GEX/*
 models/pretrained/*
 
