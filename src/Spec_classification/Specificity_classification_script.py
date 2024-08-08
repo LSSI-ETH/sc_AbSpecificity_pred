@@ -143,17 +143,6 @@ def run():
             seq_df = Embeddings.seq_df
             seqs = Embeddings.seqs
 
-            # ### Load embeddings - ESM2 - VH_VL
-            # ESM_fl_embeddings = Embeddings.emb_ESM
-            # log.info("ESM - embeddings loaded")
-
-            # ### Load embeddings - ESM2 CDRextract - VH_VL
-            # ESM_cdr_fl_embeddings = Embeddings.emb_ESM_cdrs
-            # log.info("ESM CDRextract - embeddings loaded")
-
-            # ### Load embeddings - Antiberty - VH_VL
-            # antiberty_embeddings = Embeddings.emb_antiberty
-            # log.info("Antiberty - embeddings loaded")
 
             # Calculate the kmer vectors
             k = 3
