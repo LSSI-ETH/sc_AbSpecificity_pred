@@ -7,8 +7,9 @@ The field of antibody discovery typically involves extensive experimental screen
 ## Table of contents
 1. [Working Environment](#working-environment)
 2. [Datasets](#datasets)
-3. [Reproducing Study Results](#reproducing-study-results)
-4. [Citing This Work](#citing-this-work)
+3. [Feature generation](#feature-generation)
+4. [Model evaluations](#model-evaluations)
+5. [Citing This Work](#citing-this-work)
 
 ## Working environment
 #### Setup with Conda
@@ -23,6 +24,12 @@ The raw sequencing data is deposited in SRA under the BioProject number: PRJNA11
 1. The sequencing files were processed with cellranger (v5.0.0) and the scripts for the alignment of the files is in `scSeq_preprocess/1_Cellranger_alignment_GEX.sh` and `scSeq_preprocess/2_Cellranger_alignment_VDJ.sh`
 2. Preprocessed single cell sequencing data was further processed in R, mainly utilizing the Playtpus and Seurat packages. The analysis, including the differential expression analysis is in `scSeq_preprocess/`
 3. Preprocessing of the datasets for ML model evaluations is in `notebooks/ML_preprocess/`
+
+
+## Feature generation
+Features for the ML model evaluations were generated in the Jupyter notebooks in `notebooks/ML_preprocess/`
+1. Gene expression data was processed in `003_GEX_dataprep.ipynb`
+2. Antibody sequencing data was processed in `001_VDJ_OVA_seq_preprocessing.ipynb` and `001.2_VDJ_RBD_seq_preprocessing.ipynb`
 
 ## Model evaluations
 
