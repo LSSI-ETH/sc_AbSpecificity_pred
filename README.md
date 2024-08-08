@@ -11,7 +11,7 @@ The field of antibody discovery typically involves extensive experimental screen
 4. [Model evaluations](#model-evaluations)
 5. [Citing This Work](#citing-this-work)
 
-## Working environment
+## Working environment (#working-environment)
 #### Setup with Conda
 
 ```console
