@@ -41,4 +41,8 @@ Scripts for training and evaluating the ML models are in `src/Spec_classificatio
 ```
 
 ## Visualization
+<<<<<<< HEAD
 Visualization and summarization of the results of the model evaluation are performed with the jupyter notebooks `notebooks/model_evaluations/Metrics_visualization.ipynb` and `notebooks/model_interpretation/LogReg_Koefficient_analysis.ipynb`. The latter also contains the biological analysis of the LogReg models. 
+=======
+Visualization and summarization of the results of the model evaluation are performed with the jupyter notebooks `notebooks/model_evaluations/Metrics_visualization.ipynb` and `notebooks/model_interpretation/LogReg_Koefficient_analysis.ipynb`. The latter also contains the biological analysis of the LogReg models. 
+>>>>>>> 9dcfdc8cfe761a960c591703f875eead8767f10c
