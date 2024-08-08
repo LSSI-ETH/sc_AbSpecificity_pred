@@ -1,0 +1,27 @@
+### This is an example file for as input to the src/Spec_classification/Specificity_classification_script.py 
+[ROOT] 
+ROOT_DIR: sc_AbSpecificity_pred/
+LOAD_CLASS_DIR: sc_AbSpecificity_pred/src/Spec_classification/
+UTILS_DIR: sc_AbSpecificity_pred/src/
+
+# Can be set to OVA or RBD
+[SETUP] 
+DATASET: OVA
+
+# relative paths to the processed features
+[PATHS]
+SEQ_DF: data/processed/processed_OVA_VDJ_aaSeq_df_2023-09-28.csv
+ANARCI_DIR: data/anarci_files
+
+
+[VH_VL_EMBEDPATH]
+ESM2_var: data/processed/embeddings/OVA/esm2_VH_VL/
+ESM2_CDRextract: data/processed/embeddings/OVA/esm2_fl_VH_VL_CDRs/
+DISTANCE_MATRIX: data/processed/distance_matrix_OVA_VDJ_VJaaSeqs_2023-10-17.csv
+ANTIBERTY: data/processed/embeddings/OVA/Antiberty/
+
+[VH_EMBEDPATH]
+ESM2_var: data/processed/embeddings/OVA/VH/esm2_VH/
+ESM2_CDRextract: data/processed/embeddings/OVA/VH/esm2_fl_VH_CDRs/
+DISTANCE_MATRIX: data/processed/distance_matrix_OVA_VDJ_aaSeqs_2023-11-08.csv
+ANTIBERTY: data/processed/embeddings/OVA/Antiberty/
