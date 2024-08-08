@@ -37,7 +37,7 @@ Features for the ML model evaluations were generated in the Jupyter notebooks in
 ## Model evaluations
 Scripts for training and evaluating the ML models are in `src/Spec_classification/Specificity_classification_script.py` which can be executed as shown in the example below.
 ```console
-./ Specificity_classification_script.py --config path-to-config --simsplit_thresh 0.05 --chaintype VH_VL --outpath path-to-save-results
+./Specificity_classification_script.py --config path_to_config --simsplit_thresh 0.05 --chaintype VH_VL --outpath path_to_save_results
 ```
 
 ## Visualization
