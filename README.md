@@ -9,7 +9,8 @@ The field of antibody discovery typically involves extensive experimental screen
 2. [Datasets](#datasets)
 3. [Feature generation](#feature-generation)
 4. [Model evaluations](#model-evaluations)
-5. [Citing This Work](#citing-this-work)
+5. [Visualization](#visualization)
+6. [Citing This Work](#citing-this-work)
 
 ## Working environment
 #### Setup with Conda
@@ -34,9 +35,9 @@ Features for the ML model evaluations were generated in the Jupyter notebooks in
 
 
 ## Model evaluations
-Scripts for training and evaluating the ML models are in `src/Spec_classification/Specificity_classification_script.py` which can be executed as follows
+Scripts for training and evaluating the ML models are in `src/Spec_classification/Specificity_classification_script.py` which can be executed as shown in the example below.
 ```console
-./ Specificity_classification_script.py --config path-to-config --simsplit_thresh 0.05 --chaintype [VH, VH_VL] --outpath path-to-save-results
+./ Specificity_classification_script.py --config path-to-config --simsplit_thresh 0.05 --chaintype VH_VL --outpath path-to-save-results
 ```
 
 ## Visualization
