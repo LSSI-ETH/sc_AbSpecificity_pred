@@ -23,13 +23,10 @@ vgm_out_path <- paste0(getwd() , "/Analysis_test/")
 
 
 # define path to save plots to 
-save_path_GEX <- paste0(vgm_out_path, "GEX/Plots/")
-save_path_VDJ <- paste0(vgm_out_path, "VDJ/Plots/")
-save_path_mod <- paste0(vgm_out_path, "Modelling/Plots/")
+save_path <- paste0(vgm_out_path, "Plots/")
+ifelse(!dir.exists(file.path(save_path)), dir.create(file.path(save_path), recursive = TRUE), FALSE)
 
-ifelse(!dir.exists(file.path(save_path_GEX)), dir.create(file.path(save_path_GEX), recursive = TRUE), FALSE)
-ifelse(!dir.exists(file.path(save_path_VDJ)), dir.create(file.path(save_path_VDJ), recursive = TRUE), FALSE)
-ifelse(!dir.exists(file.path(save_path_mod)), dir.create(file.path(save_path_mod), recursive = TRUE), FALSE)
+
 
   
 # Setups
@@ -66,47 +63,22 @@ library(Platypus)
 # Load file - START OF ANALYSIS
 ########################################################
 
-VDJ_GEX_matrix <- readRDS("/Users/lerlach/Documents/current_work/OVA_seq/OVA_RBD_Wuhan_integrated/Analysis/Modelling/data/VDJ_GEX_object_OVA_RBD_harmony_overlapping_clones_rm.rds")
- 
+VDJ_GEX_matrix <- readRDS(paste0(vgm_out_path, "data/VDJ_GEX_object_OVA_RBD_integrated_harmony_overlapping_clones_rm.rds"))
+  
+
+# GEX_OVA <- readRDS(paste0(vgm_out_path, "VDJ_GEX_object_OVA_harmony_overlapping_clones_rm.rds"))[["GEX"]]
+# GEX_RBD <- readRDS(paste0(vgm_out_path, "VDJ_GEX_object_RBD_harmony_overlapping_clones_rm.rds"))[["GEX"]]
+# GEX_INT <- readRDS(paste0(vgm_out_path, "VDJ_GEX_object_RBD_harmony_overlapping_clones_rm.rds"))[["GEX"]]
+
 
 
 # just rename GEX dataset & VDJ dataset
-pbmc <- VDJ_GEX_matrix[[1]]
-VDJ_mat <- VDJ_GEX_matrix[[2]]
- 
+pbmc <- VDJ_GEX_matrix[[2]]
+VDJ_mat <- VDJ_GEX_matrix[[1]]
+
+DimPlot(pbmc, group.by = 'seurat_clusters') 
 
 
-
-
-# ###########################################################################################################################################################################
-# # Additional clonotyping
-# #########################################################
-# 
-# 
-# ### Create clonotyping table (def. of clones: ident. CDRH3_CDRL3)
-# clonotype_ls <- clonotype_tbl(VDJ_mat, num_clone = "all", sample_names=sample_names)
-# VDJ_tbl_all <- clonotype_ls[[1]]
-# VDJ_VJ_tbl_all <- clonotype_ls[[2]]
-# # write_csv(VDJ_tbl, paste0(save_path_VDJ, "clone_table_all_clones_VDJ.csv"))
-# # write_csv(VDJ_VJ_tbl, paste0(save_path_VDJ, "clone_table_all_clones_VDJVJ.csv"))
-# 
-# 
-# ### Create clonotyping table (def. of clones: ident. CDRH3_CDRL3)
-# clonotype_ls <- clonotype_tbl(VDJ_mat, num_clones, sample_names)
-# VDJ_tbl <- clonotype_ls[[1]]
-# VDJ_VJ_tbl <- clonotype_ls[[2]]
-# # write_csv(VDJ_tbl, paste0(save_path_VDJ, "clone_table_top", num_clones, "clones_VDJ.csv"))
-# # write_csv(VDJ_VJ_tbl, paste0(save_path_VDJ, "clone_table_top", num_clones, "clones_VDJVJ.csv"))
-# 
-# ## clonotyping according to 10x definition
-# clonotype_ls <- clonotype_tbl(VDJ_mat, num_clones, sample_names, clone_def = "clonotype_id_10x")
-# VDJ_tbl_10x <- clonotype_ls[[1]]
-# VDJ_VJ_tbl_10x <- clonotype_ls[[2]]
-# # write_csv(VDJ_tbl_10x, paste0(save_path_VDJ, "clone_table_top", num_clones, "clones_VDJ_10x.csv"))
-# # write_csv(VDJ_VJ_tbl_10x, paste0(save_path_VDJ, "clone_table_top", num_clones, "clones_VDJVJ_10x.csv"))
-# 
-# 
-# 
 
 
 ########################################################
@@ -122,16 +94,34 @@ Idents(pbmc) <- "sample_id"
 s1_high <- WhichCells(pbmc, ident = c("s1_OVA", "s3_OVA"))
 s1R_high <- WhichCells(pbmc, ident = c("s1_RBD"))
 
+# PCA Plot
+plot1 <- DimPlot(pbmc, reduction = "pca", cells.highlight= list(s1_high,s1R_high), pt.size = 1) +
+  scale_color_manual(labels = c("Others", "OVA_spec", "RBD_sepc"), values = c("grey", "darkblue", "darkred"))
+plot1
 
+# PCA Plot
+plot1 <- DimPlot(pbmc, reduction = "harmony", cells.highlight= list(s1_high,s1R_high), pt.size = 1) +
+  scale_color_manual(labels = c("Others", "OVA_spec", "RBD_sepc"), values = c("grey", "darkblue", "darkred"))
+plot1
 
+# UMAP Plot
 plot1 <- DimPlot(pbmc, reduction = "umap", cells.highlight= list(s1_high,s1R_high), pt.size = 1) +
   scale_color_manual(labels = c("Others", "OVA_spec", "RBD_sepc"), values = c("grey", "darkblue", "darkred"))
 plot1
-ggsave(filename=paste0(save_path_GEX, "UMAP_OVA_RBD_spec.pdf"),plot=plot1)
+
+ggsave(filename=paste0(save_path, "UMAP_OVA_RBD_spec.pdf"),plot=plot1)
 
 
+# UMAPs with just showing sample 1&3
+Idents(pbmc) <- "sample_id"
+s1_high <- WhichCells(pbmc, ident = c("s1_OVA", "s3_OVA"))
+s1R_high <- WhichCells(pbmc, ident = c("s1_RBD"))
+# UMAP Plot
+plot2 <- DimPlot(pbmc, reduction = "umap", cells.highlight= list(s1_high,s1R_high), pt.size = 1) +
+  scale_color_manual(labels = c("Others", "OVA_spec", "RBD_sepc"), values = c("grey", "darkblue", "darkred"))
+plot1 + plot2
 
-
+FeaturePlot(pbmc, features = c("XBP1")) + FeaturePlot(pbmc, features = c("rna_CD3E"))
 
 ######################################################### 
 # Start of VDJ analysis 
@@ -152,9 +142,10 @@ VDJ_mat_donut <- VDJ_clonal_donut(VDJ = VDJ_mat,
                              # non.expanded.color)
 
 VDJ_mat_donut[[1]]
+VDJ_mat_donut[[2]]  
 
 for (i in 1:length(sample_names)) {
-  ggsave(filename=paste0(save_path_VDJ, "Expansion_donuts_s", i, ".pdf"), plot=VDJ_mat_donut[[i]], width = 10)
+  ggsave(filename=paste0(save_path, "Expansion_donuts_s", i, ".pdf"), plot=VDJ_mat_donut[[i]], width = 10)
 }
 
 

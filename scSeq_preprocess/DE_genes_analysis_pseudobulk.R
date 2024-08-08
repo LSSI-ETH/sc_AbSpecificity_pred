@@ -515,10 +515,8 @@ reference <- VDJ_GEX_matrix[["GEX"]]
 VDJ_mat <- VDJ_GEX_matrix[["VDJ"]]
 
 
-
 #### Set TRUE if plots are saved
 save_stuff <- TRUE
-
 
 
 ##########################################################################
@@ -528,7 +526,7 @@ save_stuff <- TRUE
 ##### Split off 30% of the cells randomly 
 # set another reference barcode (unique for whole dataset)
 reference$barcode <- names(reference$orig.ident)
-reference@meta.data$ag_specificity <- factor(reference@meta.data$ag_specificity, levels = c("specific", "nonspecific") )
+reference@meta.data$ag_specificity <- factor(reference_train@meta.data$ag_specificity, levels = c("specific", "nonspecific") )
 
 
 bcs <- names(reference$barcode)
@@ -549,16 +547,14 @@ reference_test <- subset(reference, subset = barcode %in% bc_30)
 
 
 
-
-
 ##########################################################################
-####### PSEUDO BULKING OF TRAINING SET ---- MATYAS WORK
+####### PSEUDO BULKING AND DE TESTING
 ##########################################################################
 
 
 
 
-Seurat3 <- reference_train
+Seurat3 <- reference
 Seurat3$ag_specificity <- factor(Seurat3$ag_specificity, levels = c("specific", "nonspecific") )
 
 
@@ -570,95 +566,6 @@ sig_res <- DE_function(Seurat3, DE_outPath, save_stuff = save_stuff, antigens, c
 
 
 
-
-##################################################################################################################################################################
-# CLASSIFICATION BASED ON DE GENES
-#Identify gene sets 
-##################################################################################################################################################################
-
-
-clf_ls <- DE_clf_function(reference_train, reference_test, sig_res)
-
- 
-reference_train <- clf_ls[1][[1]]
-reference_test <- clf_ls[2][[1]]
-top10_up <- clf_ls[3]
-top10_down <- clf_ls[4]
-
-
-
-
-########### Top10_up 
-# calculate average of the gene expression of the upreg module
-reference_mean_up <- summary(reference_train$top10_up1[reference_train$ag_specificity == "specific"])["Mean"]
-
-
-###### Calculate confusion matrix
-reference_test$spec_pred <- reference_test$top10_up1 >= reference_mean_up
-reference_test$spec_pred[reference_test$spec_pred == TRUE] <- "specific"
-reference_test$spec_pred[reference_test$spec_pred == FALSE] <- "nonspecific"
-
-reference_test$spec_pred <- factor(reference_test$spec_pred, levels = c("specific", "nonspecific"))
-
-#Creating confusion matrix
-example <- confusionMatrix(data=reference_test$spec_pred, reference = reference_test$ag_specificity)
-
-#Display results 
-example
-print(paste0("Prec: ", round(example$byClass["Precision"], 4)))
-print(paste0("Recall: ", round(example$byClass["Recall"], 4)))
-print(paste0("F1: ", round(example$byClass["F1"], 4)))
-
-
-
-
-
-########### Top10_down
-# calculate average of the gene expression of the upreg module
-reference_mean_d <- summary(reference_train$top10_down1[reference_train$ag_specificity == "specific"])["Mean"]
-
-
-###### Calculate confusion matrix
-reference_test$spec_pred <- reference_test$top10_down1 <= reference_mean_d
-reference_test$spec_pred[reference_test$spec_pred == TRUE] <- "specific"
-reference_test$spec_pred[reference_test$spec_pred == FALSE] <- "nonspecific"
-
-reference_test$spec_pred <- factor(reference_test$spec_pred, levels = c("specific", "nonspecific"))
-
-#Creating confusion matrix
-example <- confusionMatrix(data=reference_test$spec_pred, reference = reference_test$ag_specificity)
-
-#Display results 
-example
-
-print(paste0("Prec: ", round(example$byClass["Precision"], 4)))
-print(paste0("Recall: ", round(example$byClass["Recall"], 4)))
-print(paste0("F1: ", round(example$byClass["F1"], 4)))
-
-
-
-
-
-
-
-########### Top10_down & Top10_up
-
-reference_test$spec_pred <-  reference_test$top10_down1 <= reference_mean_d &reference_test$top10_up1 >= reference_mean_up
-reference_test$spec_pred[reference_test$spec_pred == TRUE] <- "specific"
-reference_test$spec_pred[reference_test$spec_pred == FALSE] <- "nonspecific"
-
-reference_test$spec_pred <- factor(reference_test$spec_pred, levels = c("specific", "nonspecific"))
-
-#Creating confusion matrix
-example <- confusionMatrix(data=reference_test$spec_pred, reference = reference_test$ag_specificity)
-
-#Display results 
-example
-
-print("Top10_up & Top10_down")
-print(paste0("Prec: ", round(example$byClass["Precision"], 4)))
-print(paste0("Recall: ", round(example$byClass["Recall"], 4)))
-print(paste0("F1: ", round(example$byClass["F1"], 4)))
 
 
 
