@@ -30,6 +30,14 @@ The raw sequencing data is deposited in SRA under the BioProject number: PRJNA11
 Features for the ML model evaluations were generated in the Jupyter notebooks in `notebooks/ML_preprocess/`
 1. Gene expression data was processed in `003_GEX_dataprep.ipynb`
 2. Antibody sequencing data was processed in `001_VDJ_OVA_seq_preprocessing.ipynb` and `001.2_VDJ_RBD_seq_preprocessing.ipynb`
+3. The PLM embeddings were generated with the notebooks in `notebooks/ESM_embed/001_Generate_ESM_embeddings.ipynb`, `notebooks/ESM_embed/002_Extract_CDR3Embeddings.ipynb` and `notebooks/Antiberty_embed/Embed_seqs_antiberty.ipynb`
+
 
 ## Model evaluations
+Scripts for training and evaluating the ML models are in `src/Spec_classification/Specificity_classification_script.py` which can be executed as follows
+```console
+./ Specificity_classification_script.py --config path-to-config --simsplit_thresh 0.05 --chaintype [VH, VH_VL] --outpath path-to-save-results
+```
 
+## Visualization
+Visualization and summarization of the results of the model evaluation are performed with the jupyter notebooks `notebooks/model_evaluations/Metrics_visualization.ipynb` and `notebooks/model_interpretation/LogReg_Koefficient_analysis.ipynb`. The latter also contains the biological analysis of the LogReg models. 
