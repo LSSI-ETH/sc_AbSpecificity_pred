@@ -1,4 +1,4 @@
-name: abmap
+name: abpred
 channels:
   - biocore
   - conda-forge
