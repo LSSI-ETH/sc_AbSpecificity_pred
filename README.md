@@ -1,5 +1,5 @@
 # Evaluating predictive patterns of antigen-specific B cells by single- cell transcriptome and antibody repertoire sequencing
-This repository contains code to perform the analysis performed by L. Erlach, et al. 
+This repository contains code to perform the analysis performed by *L. Erlach, et al.*
 
 ## Abstract
 The field of antibody discovery typically involves extensive experimental screening of B cells from immunized animals. Machine learning (ML)-guided prediction of antigen-specific B cells could accelerate this process, but requires sufficient training data with antigen-specificity labeling. Here, we introduce a dataset of single-cell transcriptome and antibody repertoire sequencing of B cells from immunized mice, which are labeled as antigen-specific or non-specific through experimental selections. We identify gene expression patterns associated with antigen-specificity by differential gene expression analysis and assess their antibody sequence diversity. Subsequently, we benchmark various ML models, both linear and non-linear, trained on different combinations of gene expression and antibody repertoire features. Additionally, we assess transfer learning using features from general and antibody-specific protein language models (PLMs). Our findings show that gene expression-based models outperform sequence-based models for antigen-specificity predictions, highlighting a promising avenue for computational-guided antibody discovery.
@@ -35,7 +35,10 @@ Features for the ML model evaluations were generated in the Jupyter notebooks in
 
 
 ## Model evaluations
-Scripts for training and evaluating the ML models are in `src/Spec_classification/Specificity_classification_script.py` which can be executed as shown in the example below.
+Scripts for training and evaluating the ML models are in 
+- `src/Spec_classification/Specificity_classification_script.py` 
+- `src/GEX_VDJ/Spec_classification/Specificity_classification_script.py` 
+These scripts can be executed as shown in the example below.
 ```console
 ./Specificity_classification_script.py --config path_to_config --simsplit_thresh 0.05 --chaintype VH_VL --outpath path_to_save_results
 ```
