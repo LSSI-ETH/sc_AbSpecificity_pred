@@ -31,7 +31,7 @@ The raw sequencing data is deposited in SRA under the BioProject number: PRJNA11
 Features for the ML model evaluations were generated in the Jupyter notebooks in `notebooks/ML_preprocess/`
 1. Gene expression data was processed in `003_GEX_dataprep.ipynb`
 2. Antibody sequencing data was processed in `001_VDJ_OVA_seq_preprocessing.ipynb` and `001.2_VDJ_RBD_seq_preprocessing.ipynb`
-3. The PLM embeddings were generated with the notebooks in `notebooks/ESM_embed/001_Generate_ESM_embeddings.ipynb`, `notebooks/ESM_embed/002_Extract_CDR3Embeddings.ipynb` and `notebooks/Antiberty_embed/Embed_seqs_antiberty.ipynb`
+3. The PLM embeddings were generated with the notebooks in `notebooks/ESM_embed/001_Generate_ESM_embeddings.ipynb`, `notebooks/ESM_embed/002_Extract_CDR3Embeddings.ipynb`, `notebooks/Antiberty_embed/Embed_seqs_antiberty.ipynb` and `notebooks/ESM3_embed/Embed_seqs_ESM3.ipynb`
 
 
 ## Model evaluations
