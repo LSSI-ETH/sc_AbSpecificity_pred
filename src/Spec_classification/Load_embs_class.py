@@ -70,6 +70,11 @@ class LoadEmbeddings_VH_VL:
             self.ROOT_DIR, config[config_dir]["ESM2_CDRextract"]
         )
 
+        # Set input path - ESM-3 embeddings
+        self.emb_inputPath_ESM3 = os.path.join(
+            self.ROOT_DIR, config[config_dir]["ESM3_var"]
+        )
+
         # Antiberty embeddings
         self.emb_inputPath_antiberty = os.path.join(
             self.ROOT_DIR, config[config_dir]["ANTIBERTY"]
@@ -88,11 +93,11 @@ class LoadEmbeddings_VH_VL:
         self.seq_df = pd.read_csv(self.seq_inputPath, usecols=seq_cols_load)
 
         # delete one extra row for VH_VL sequences
-        if seq_col == "VDJ_VJ_aaSeq" or filter_VH_complete is True:
-            self.seq_df = self.seq_df[self.seq_df.seq_complete == True]
-
         if filter_192 is True:
             self.seq_df.drop(192, inplace=True)
+            
+        if seq_col == "VDJ_VJ_aaSeq" or filter_VH_complete is True:
+            self.seq_df = self.seq_df[self.seq_df.seq_complete == True]
 
         self.seq_df.reset_index(drop=True, inplace=True)
         self.names = self.seq_df.seq_id.tolist()
@@ -132,6 +137,17 @@ class LoadEmbeddings_VH_VL:
                 if verbose is True:
                     print("ESM CDRextract - embeddings VH_VL loaded")
 
+            if embedding_type == "all" or embedding_type == "esm3":
+                ### ESM3 - VH_VL
+                self.emb_ESM3_var = utils.load_pickle_embeddings_VH_VL(
+                    self.names, self.emb_inputPath_ESM3, embedding_type="var"
+                )
+                self.emb_ESM3 = utils.mean_over_HL(
+                    self.emb_ESM3_var
+                )  # average embeddings over across seq_len & VH+VL
+                if verbose is True:
+                    print("ESM-3 - VH_VL embeddings loaded")
+
             if embedding_type == "all" or embedding_type == "antiberty":
                 ### Antiberty - VH_VL
                 self.emb_antiberty_var = utils.load_pickle_embeddings_VH_VL(
@@ -164,13 +180,25 @@ class LoadEmbeddings_VH_VL:
                     print("ESM - VH embeddings loaded")
 
             if embedding_type == "all" or embedding_type == "esm_cdrs":
-                ### ESM2 CDR - VH
-                embeddings = utils.load_pickle_embeddings(
+                ### ESM_cdr - VH
+                self.emb_ESM3_var = utils.load_pickle_embeddings(
                     self.names, self.emb_inputPath_ESM_cdrs
                 )
-                self.emb_ESM_cdrs = np.array(embeddings)
+                self.emb_ESM_cdrs = np.array(self.emb_ESM3_var)
                 if verbose is True:
                     print("ESM CDRextract - VH embeddings loaded")
+
+            if embedding_type == "all" or embedding_type == "esm3":
+                ### ESM3 - VH
+                embeddings = utils.load_pickle_embeddings(
+                    self.names, self.emb_inputPath_ESM3
+                )
+                self.emb_ESM3 = np.array(
+                    [emb.mean(0) for emb in embeddings]
+                    ) # average over the sequence length
+                
+                if verbose is True:
+                    print("ESM-3 - VH embeddings loaded")
 
             if embedding_type == "all" or embedding_type == "antiberty":
                 ### Antiberty - VH

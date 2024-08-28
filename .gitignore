@@ -44,7 +44,7 @@ config_*.txt
 ############
 data/processed/*
 data/raw/*
-data/model_evaluations/Plots/*
+data/model_evaluations/*
 data/anarci_files/*
 models/pretrained/*
 sc_AbSpecificity_pred.git/

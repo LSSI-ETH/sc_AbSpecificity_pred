@@ -53,10 +53,7 @@ testing = False
 ####################################
 
 # add root directory to path such that the utils_nb file can be imported
-if testing:
-    CONFIG_PATH = "/data/cb/scratch/lenae/sc_AbSpecificity_pred/config_file_RBD.txt"
-else:
-    CONFIG_PATH = args.config
+CONFIG_PATH = args.config
 
 UTILS_DIR = "../"
 UTILS_DIR1 = "./"
@@ -95,37 +92,41 @@ def run():
     log = utils.Logger(__name__, log_file=f"{today}_{dataset}_app.log").get_logger()
     log.info("Start Script!")
 
-    if testing:
+    # set Ab chain type
+    if args.chaintype == "both":
+        VH_list = ["VDJ_VJ_aaSeq", "VDJ_VJ_aaSeq"]
+    elif args.chaintype == "VH":
         VH_list = ["VDJ_aaSeq"]
     else:
-        if args.chaintype == "both":
-            VH_list = ["VDJ_VJ_aaSeq", "VDJ_VJ_aaSeq"]
-        elif args.chaintype == "VH":
-            VH_list = ["VDJ_aaSeq"]
-        else:
-            VH_list = ["VDJ_VJ_aaSeq"]
+        VH_list = ["VDJ_VJ_aaSeq"]
 
     for ab_chain in VH_list:
-        if ab_chain == "VDJ_aaSeq":
-            c_type = "VH"
-            filter_192 = False
-        if ab_chain == "VDJ_VJ_aaSeq":
-            c_type = "VH_VL"
-
-            if dataset == "OVA":
-                filter_192 = True
-            else:
-                filter_192 = False
 
         if dataset == "OVA":
+            filter_192 = True
+        elif dataset == "RBD":
+            filter_192 = False
+
+
+        if ab_chain == "VDJ_aaSeq":
+            c_type = "VH"
             filter_VH_complete = False
-        else:
+            VH_emb_fname_suff = "_H"
+            filter_192 = False
+            
+        if ab_chain == "VDJ_VJ_aaSeq":
+            c_type = "VH_VL"
+            filter_VH_complete = True
+            VH_emb_fname_suff = ""
+            
+
+        if dataset == "RBD":
             filter_VH_complete = True
 
         ######## LOADING CLASS ########
         try:
             if testing:
-                embedding_type = "esm_cdrs"
+                embedding_type = "esm3"
             else:
                 embedding_type = "all"
 
@@ -136,11 +137,12 @@ def run():
                 filter_VH_complete=filter_VH_complete,
             )
 
-            Embeddings.load_embeddings(embedding_type=embedding_type, verbose=False)
+            Embeddings.load_embeddings(embedding_type=embedding_type, VH_emb_fname_suff=VH_emb_fname_suff, verbose=False)
             # Seq column name 'VDJ_aaSeq', 'VDJ_aaSeqCDR3', 'cdr_comb'...
 
             ### Load mAb sequences
             seq_df = Embeddings.seq_df
+            
             seqs = Embeddings.seqs
 
 
@@ -165,10 +167,7 @@ def run():
             # create train test splits - sequence clustering
             N_SPLITS = 5
 
-            if testing:
-                SIM_SPLIT = 0.05
-            else:
-                SIM_SPLIT = args.simsplit_thresh
+            SIM_SPLIT = args.simsplit_thresh
 
             y = np.array(seq_df["group_id"])
             if np.unique(y)[0] == 1 and np.unique(y)[1] == 2:
@@ -217,8 +216,8 @@ def run():
         ########### RUN CLASSIFICATION ###########
         try:
             if testing:
-                emb_n_list = ["ESM-2-CDRextract"]
-                emb_list = [Embeddings.emb_ESM_cdrs]
+                emb_n_list = ["ESM-3"]
+                emb_list = [Embeddings.emb_ESM3]
             else:
                 # define embedding names
                 emb_n_list = ["ESM-2", "ESM-2-CDRextract", "3-mer", "Antiberty"]
@@ -237,9 +236,9 @@ def run():
                 f"{today}_{dataset}_{c_type}_{SIM_SPLIT}_Spec_classification_CV_results.csv",
             )
 
-            # pipe_n = ['', '_pca']# pipes_ls = [['', '_pca'], [[('scaler', StandardScaler())], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]]
+            # define pipeline
             pipe_n = [""]
-            # pipes_ls = [[( 'scaler', StandardScaler() )], [('scaler', StandardScaler()), ('pca', PCA(n_components = 50))]]
+            
             pipes_ls = [[("scaler", StandardScaler())]]
             results_l = []
             for n, pipes in zip(pipe_n, pipes_ls):
